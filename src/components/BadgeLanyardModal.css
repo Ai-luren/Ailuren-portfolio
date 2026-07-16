@@ -1,0 +1,40 @@
+.lanyard-experience {
+  position: fixed;
+  top: var(--lanyard-top);
+  left: var(--lanyard-left);
+  z-index: 2147483000;
+  width: min(44rem, 100vw);
+  height: min(56rem, 100vh);
+  overflow: visible;
+  isolation: isolate;
+  transform: translateX(-50%);
+  transform-origin: 50% 0;
+  pointer-events: auto;
+}
+
+.lanyard-stage {
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+
+.lanyard-stage .lanyard-wrapper {
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+
+.lanyard-experience.is-retracting {
+  animation: lanyard-retract 480ms cubic-bezier(.45, 0, .8, .45) forwards;
+  pointer-events: none;
+}
+
+@keyframes lanyard-retract {
+  0% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  65% { opacity: .9; transform: translateX(-50%) translateY(-8rem) scale(.72); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-15rem) scale(.18); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lanyard-experience.is-retracting { animation-duration: 1ms; }
+}

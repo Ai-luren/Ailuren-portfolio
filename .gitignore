@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Local development cache and logs
+.vite/
+dist/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# macOS metadata
+.DS_Store
+
+# Local review and upload workspace
+.audit/
+.impeccable/
+.uploads/
