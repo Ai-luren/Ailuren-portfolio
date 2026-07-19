@@ -6,6 +6,7 @@
   --comet-rotate-x: 0deg;
   --comet-rotate-y: 0deg;
   --comet-lift: 0px;
+  --comet-press-scale: 1;
   /* 精选创作的 Z 轴层级，修改这里即可统一调整。 */
   --comet-z-image: 60px;
   --comet-z-award: 20px;
@@ -18,9 +19,9 @@
 }
 
 .comet-card > .comet-archive__card {
-  transform: translate3d(0, var(--comet-lift), 0) rotateX(var(--comet-rotate-x)) rotateY(var(--comet-rotate-y));
+  transform: scale(var(--comet-press-scale)) translate3d(0, var(--comet-lift), 0) rotateX(var(--comet-rotate-x)) rotateY(var(--comet-rotate-y));
   transform-style: preserve-3d;
-  transition: transform .42s cubic-bezier(.2,.75,.25,1);
+  transition: none;
   will-change: transform;
 }
 

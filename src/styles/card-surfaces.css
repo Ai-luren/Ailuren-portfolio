@@ -15,8 +15,7 @@
 .comet-archive__glass,
 .impact-glass,
 #experiments .experiment-rail,
-.contact-links,
-.footer-contact-panel {
+.contact-links {
   border: 1px solid var(--portfolio-card-border) !important;
   border-radius: var(--portfolio-card-radius) !important;
   background: var(--portfolio-card-surface) !important;
@@ -30,8 +29,7 @@
 .comet-archive__card,
 .comet-archive__glass,
 .impact-glass,
-#experiments .experiment-rail,
-.footer-contact-panel {
+#experiments .experiment-rail {
   border-radius: var(--portfolio-card-radius) !important;
 }
 

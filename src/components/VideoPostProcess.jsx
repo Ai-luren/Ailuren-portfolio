@@ -2,20 +2,20 @@ import { Mesh, Program, Renderer, Texture, Triangle } from 'ogl';
 import { useEffect } from 'react';
 
 const DEFAULT_SETTINGS = {
-  brightness: 100,
-  mask: 10,
-  saturation: 100,
-  contrast: 108,
+  brightness: 80,
+  mask: 0,
+  saturation: 80,
+  contrast: 96,
   blur: 0,
-  vignette: 30,
-  noise: 2,
-  pixel: 64,
-  colorDepth: 14,
-  dither: 16,
-  edge: 2,
-  crt: 10,
-  glow: 5,
-  chroma: 0
+  vignette: 100,
+  noise: 8,
+  pixel: 31,
+  colorDepth: 40,
+  dither: 10,
+  edge: 20,
+  crt: 38,
+  glow: 24,
+  chroma: 4
 };
 
 const vertex = `
@@ -156,7 +156,8 @@ void main() {
   float retroPresence = max(uPixelation, uCrt * 0.01);
   float edge = distance(vUv, vec2(0.5)) * 1.4142;
   color *= 1.0 - smoothstep(0.58, 0.88, edge) * uVignette * 0.9 * retroPresence;
-  color *= 1.0 - uMask * 0.8 * retroPresence;
+  // The readability mask is scoped to the Hero in CSS; never darken the global video here.
+  color *= 1.0;
   gl_FragColor = vec4(max(color, 0.0), 1.0);
 }
 `;
