@@ -1,5 +1,5 @@
 import { Camera, Mesh, Plane, Program, Renderer, Texture, Transform } from 'ogl';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function debounce(func, wait) {
   let timeout;
@@ -663,11 +663,22 @@ export default function CircularGallery({
   enableWheel = true,
   enableKeyboard = true,
   verticalOffset = 0,
-  onImageLoad
+  onImageLoad,
+  mobileFallback = null,
+  disableOnMobile = false
 }) {
   const containerRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches);
+  useEffect(() => {
+    if (!disableOnMobile || !window.matchMedia) return undefined;
+    const mediaQuery = window.matchMedia('(max-width: 820px)');
+    const onChange = (event) => setIsMobile(event.matches);
+    mediaQuery.addEventListener?.('change', onChange);
+    return () => mediaQuery.removeEventListener?.('change', onChange);
+  }, [disableOnMobile]);
   useEffect(() => {
     if (!containerRef.current) return;
+    if (disableOnMobile && isMobile) return undefined;
     let app;
     let isMounted = true;
     let latestVisibility = true;
@@ -701,7 +712,8 @@ export default function CircularGallery({
       visibilityObserver?.disconnect();
       if (app) app.destroy();
     };
-  }, [items, bend, textColor, borderRadius, font, fontUrl, scrollSpeed, scrollEase, showTitles, enableWheel, enableKeyboard, verticalOffset, onImageLoad]);
+  }, [items, bend, textColor, borderRadius, font, fontUrl, scrollSpeed, scrollEase, showTitles, enableWheel, enableKeyboard, verticalOffset, onImageLoad, disableOnMobile, isMobile]);
+  if (disableOnMobile && isMobile && mobileFallback) return mobileFallback;
   return (
     <div
       className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
