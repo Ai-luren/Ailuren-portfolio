@@ -1333,8 +1333,12 @@
       box-shadow: 0 0 38px rgba(196, 220, 245, .12);
     }
 
-    /* 叙事优化：视频负责建立世界，内容负责推进故事。 */
-    #video-overlay {
+    /* 叙事优化：Hero 独占阅读蒙版，后续章节保留 WebGL 原始调色。 */
+    #video-overlay,
+    #video-vignette {
+      display: none !important;
+    }
+    body.is-on-hero #video-overlay {
       display: block !important;
       z-index: 2;
       background:
@@ -1342,7 +1346,7 @@
         linear-gradient(180deg, rgba(3, 8, 14, .32), transparent 30%, transparent 66%, rgba(3, 8, 14, .56));
       opacity: .86;
     }
-    #video-vignette {
+    body.is-on-hero #video-vignette {
       display: block !important;
       z-index: 3;
       box-shadow: inset 0 0 12vw rgba(2, 6, 12, .42);
@@ -1351,35 +1355,16 @@
       background: linear-gradient(90deg, rgba(3, 8, 14, .9) 0%, rgba(3, 8, 14, .72) 38%, rgba(3, 8, 14, .24) 68%, transparent 86%);
       opacity: 1;
     }
-    body.is-on-profile #video-overlay,
-    body.is-on-projects #video-overlay,
-    body.is-on-recognition #video-overlay,
-    body.is-on-experiments #video-overlay,
-    body.is-on-contact #video-overlay { opacity: .9; }
-    body.is-on-recognition #video-overlay { opacity: .96; }
-    body.is-on-profile #video-overlay {
-      background:
-        linear-gradient(90deg, rgba(3, 8, 14, .92) 0%, rgba(3, 8, 14, .72) 42%, rgba(3, 8, 14, .48) 100%),
-        rgba(3, 8, 14, .26);
-    }
-    body.is-on-projects #video-overlay,
-    body.is-on-recognition #video-overlay {
-      background:
-        linear-gradient(180deg, rgba(3, 8, 14, .68), rgba(3, 8, 14, .58)),
-        rgba(3, 8, 14, .38);
-    }
-    body.is-on-recognition #video-overlay { opacity: 1; }
-
-    /* WebGL 画布只负责视频后处理；叙事蒙版始终位于画布之上。 */
+    /* WebGL 画布只负责视频后处理；Hero 蒙版位于画布之上。 */
     #video-webgl { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; }
     #hero-profile-mask { z-index: 2; }
-    #video-overlay,
-    #video-bg.is-webgl-ready #video-overlay {
+    body.is-on-hero #video-overlay,
+    body.is-on-hero #video-bg.is-webgl-ready #video-overlay {
       display: block !important;
       z-index: 3;
     }
-    #video-vignette,
-    #video-bg.is-webgl-ready #video-vignette {
+    body.is-on-hero #video-vignette,
+    body.is-on-hero #video-bg.is-webgl-ready #video-vignette {
       display: block !important;
       z-index: 4;
     }
@@ -1508,7 +1493,7 @@
 </head>
 <body class="is-loading is-on-hero">
   <div id="loading" aria-live="polite"><span class="loading-copy">正在进入创作舱</span><span class="loading-line"></span></div>
-  <div id="video-bg" aria-hidden="true"><video id="hero-video" muted playsinline preload="auto"><source src="hero.mp4" type="video/mp4" /></video><div id="hero-profile-mask"></div><div id="video-overlay"></div><div id="video-vignette"></div></div>
+  <div id="video-bg" aria-hidden="true"><video id="hero-video" muted playsinline preload="metadata"><source src="hero.mp4" type="video/mp4" /></video><div id="hero-profile-mask"></div><div id="video-overlay"></div><div id="video-vignette"></div></div>
   <div class="video-tuner" id="video-tuner">
     <button class="video-tuner__toggle" type="button" aria-expanded="false" aria-controls="video-tuner-panel">编辑背景</button>
     <div class="video-tuner__panel" id="video-tuner-panel" hidden>
@@ -1585,11 +1570,11 @@
             </div>
             <div class="experience-progress" aria-hidden="true"><span class="experience-progress-fill"></span></div>
             <div class="experience-details" aria-live="polite">
-              <article class="experience-detail" data-experience-panel="0" data-experience-mark="01"><div class="experience-illustration"><img src="./assets/work-history-illustrations/astronaut/01-motion-design.png" alt="宇航员在深空工作室控制电影胶片，表达动态设计与镜头节奏" loading="eager"></div><small>CAPABILITY / 01 · 2017—2018</small><h3>从镜头节奏开始</h3><p class="experience-role">英合创意文化传播 · 视频设计师</p><p class="experience-description">网综片头、栏目包装与动态海报</p></article>
-              <article class="experience-detail" data-experience-panel="1" data-experience-mark="02"><div class="experience-illustration"><img src="./assets/work-history-illustrations/astronaut/02-product-brand.png" alt="宇航员在深空产品渲染舱调整产品与光影" loading="lazy"></div><small>CAPABILITY / 02 · 2018—2019</small><h3>把产品变成场景</h3><p class="experience-role">壹迦公关策划 · 三维设计组长</p><p class="experience-description">小米生态链产品渲染与品牌动态</p></article>
-              <article class="experience-detail" data-experience-panel="2" data-experience-mark="03"><div class="experience-illustration"><img src="./assets/work-history-illustrations/astronaut/03-effect-play.png" alt="宇航员把特效创意送入循环装置，表达从实验到规模化产品" loading="lazy"></div><small>CAPABILITY / 03 · 2019—2024</small><h3>让创意进入产品</h3><p class="experience-role">快手 · 特效设计师 / AI 效果与动态设计</p><p class="experience-description">快影 AI 玩法、视频模板、特效与动态</p><p class="experience-honor">洛子峰奖 · 千万 DAU 产品</p></article>
-              <article class="experience-detail" data-experience-panel="3" data-experience-mark="04"><div class="experience-illustration"><img src="./assets/work-history-illustrations/astronaut/04-ai-effect-delivery.png" alt="宇航员把 AI 图片效果通过验证门交付上线" loading="lazy"></div><small>CAPABILITY / 04 · 2024—2026</small><h3>从想法做到上线</h3><p class="experience-role">小米 · 高级动效原型设计师 / AI 效果设计</p><p class="experience-description">相册 AI 图片和视频效果，从想法做到上线</p><p class="experience-honor">Agent 挑战冠亚军 · AI 效率先锋官</p></article>
-              <article class="experience-detail" data-experience-panel="4" data-experience-mark="05"><div class="experience-illustration"><img src="./assets/work-history-illustrations/astronaut/05-ai-workflow.png" alt="宇航员整理可复用的 AI 工作流模块" loading="lazy"></div><small>CAPABILITY / 05 · NOW</small><h3>挖掘AI 无限可能</h3><p class="experience-role">AI 创意效果</p><p class="experience-description">继续探索 AI 的各种形态</p></article>
+              <article class="experience-detail" data-experience-panel="0" data-experience-mark="01"><div class="experience-illustration"><img src="./assets/work-history-illustrations/astronaut/01-motion-design.webp" alt="宇航员在深空工作室控制电影胶片，表达动态设计与镜头节奏" loading="eager" fetchpriority="high" decoding="async"></div><small>CAPABILITY / 01 · 2017—2018</small><h3>从镜头节奏开始</h3><p class="experience-role">英合创意文化传播 · 视频设计师</p><p class="experience-description">网综片头、栏目包装与动态海报</p></article>
+              <article class="experience-detail" data-experience-panel="1" data-experience-mark="02"><div class="experience-illustration"><img src="./assets/work-history-illustrations/astronaut/02-product-brand.webp" alt="宇航员在深空产品渲染舱调整产品与光影" loading="lazy" decoding="async"></div><small>CAPABILITY / 02 · 2018—2019</small><h3>把产品变成场景</h3><p class="experience-role">壹迦公关策划 · 三维设计组长</p><p class="experience-description">小米生态链产品渲染与品牌动态</p></article>
+              <article class="experience-detail" data-experience-panel="2" data-experience-mark="03"><div class="experience-illustration"><img src="./assets/work-history-illustrations/astronaut/03-effect-play.webp" alt="宇航员把特效创意送入循环装置，表达从实验到规模化产品" loading="lazy" decoding="async"></div><small>CAPABILITY / 03 · 2019—2024</small><h3>让创意进入产品</h3><p class="experience-role">快手 · 特效设计师 / AI 效果与动态设计</p><p class="experience-description">快影 AI 玩法、视频模板、特效与动态</p><p class="experience-honor">洛子峰奖 · 千万 DAU 产品</p></article>
+              <article class="experience-detail" data-experience-panel="3" data-experience-mark="04"><div class="experience-illustration"><img src="./assets/work-history-illustrations/astronaut/04-ai-effect-delivery.webp" alt="宇航员把 AI 图片效果通过验证门交付上线" loading="lazy" decoding="async"></div><small>CAPABILITY / 04 · 2024—2026</small><h3>从想法做到上线</h3><p class="experience-role">小米 · 高级动效原型设计师 / AI 效果设计</p><p class="experience-description">相册 AI 图片和视频效果，从想法做到上线</p><p class="experience-honor">Agent 挑战冠亚军 · AI 效率先锋官</p></article>
+              <article class="experience-detail" data-experience-panel="4" data-experience-mark="05"><div class="experience-illustration"><img src="./assets/work-history-illustrations/astronaut/05-ai-workflow.webp" alt="宇航员整理可复用的 AI 工作流模块" loading="lazy" decoding="async"></div><small>CAPABILITY / 05 · NOW</small><h3>挖掘AI 无限可能</h3><p class="experience-role">AI 创意效果</p><p class="experience-description">继续探索 AI 的各种形态</p></article>
             </div>
           </div>
         </div>
@@ -1702,6 +1687,18 @@
       });
       video.addEventListener('error', revealPage, { once: true });
       window.setTimeout(revealPage, 180);
+
+      // 首屏先拿元数据，用户准备滚动或桌面端稳定停留后再开始下载完整视频。
+      var videoWarmed = false;
+      function warmVideo() {
+        if (videoWarmed || !video || !video.querySelector('source')) return;
+        videoWarmed = true;
+        video.preload = 'auto';
+        video.load();
+      }
+      window.addEventListener('pointerdown', warmVideo, { once: true, passive: true });
+      window.addEventListener('scroll', warmVideo, { once: true, passive: true });
+      if (window.innerWidth > 760) window.setTimeout(warmVideo, 1200);
 
       function setVideoTarget() {
         progressRaf = 0;

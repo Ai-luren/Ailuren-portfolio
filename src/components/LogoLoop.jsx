@@ -80,7 +80,31 @@ function useAnimationLoop(trackRef, velocity, sequenceWidth, isHovered, hoverSpe
       track.style.transform = `translate3d(${-offsetRef.current}px, 0, 0)`;
     }
 
+    let isVisible = !document.hidden;
+    const resume = () => {
+      if (isVisible && !document.hidden && frameRef.current === null) {
+        lastTimestampRef.current = null;
+        frameRef.current = requestAnimationFrame(animate);
+      }
+    };
+    const visibilityObserver = 'IntersectionObserver' in window
+      ? new IntersectionObserver(([entry]) => {
+        isVisible = Boolean(entry?.isIntersecting);
+        if (isVisible) resume();
+      }, { rootMargin: '160px' })
+      : null;
+    visibilityObserver?.observe(track.parentElement || track);
+    const onVisibilityChange = () => {
+      isVisible = !document.hidden;
+      if (isVisible) resume();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
     const animate = (timestamp) => {
+      if (!isVisible || document.hidden) {
+        frameRef.current = null;
+        return;
+      }
       if (lastTimestampRef.current === null) lastTimestampRef.current = timestamp;
       const deltaTime = Math.max(0, timestamp - lastTimestampRef.current) / 1000;
       lastTimestampRef.current = timestamp;
@@ -102,6 +126,8 @@ function useAnimationLoop(trackRef, velocity, sequenceWidth, isHovered, hoverSpe
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
       frameRef.current = null;
       lastTimestampRef.current = null;
+      visibilityObserver?.disconnect();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [trackRef, velocity, sequenceWidth, isHovered, hoverSpeed]);
 }
