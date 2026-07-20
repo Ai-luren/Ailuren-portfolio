@@ -137,6 +137,16 @@ function CircularAwardGallery() {
           enableKeyboard={false}
           verticalOffset={-0.25}
           onImageLoad={setLoadedCount}
+          disableOnMobile
+          mobileFallback={(
+            <div className="impact-award-mobile-grid" role="list" aria-label="获奖作品图片">
+              {galleryItems.map((item) => (
+                <figure key={item.image} role="listitem">
+                  <img src={item.image} alt={item.text} loading="lazy" decoding="async" onLoad={() => setLoadedCount((count) => Math.min(awards.length, count + 1))} />
+                </figure>
+              ))}
+            </div>
+          )}
         />}
       </div>
     </div>

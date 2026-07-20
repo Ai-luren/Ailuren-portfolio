@@ -33,6 +33,9 @@
 .impact-circular-gallery > div { width: 100%; height: 100%; cursor: grab; }
 .impact-award-loader { position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; gap: 8px; color: var(--impact-muted); font: 500 10px/1.2 var(--tech, var(--mono, monospace)); letter-spacing: .1em; pointer-events: none; text-align: center; transition: opacity .3s ease; }
 .impact-award-loader strong { color: var(--impact-text); font: 500 12px/1 var(--tech, var(--mono, monospace)); letter-spacing: .08em; }
+.impact-award-mobile-grid { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(122px, 30vw); gap: 12px; height: 100%; overflow-x: auto; padding: 24px 18px; overscroll-behavior-inline: contain; scrollbar-width: thin; }
+.impact-award-mobile-grid figure { min-width: 0; height: 100%; margin: 0; overflow: hidden; border: 1px solid var(--impact-border); border-radius: 14px; background: rgba(3, 8, 14, .35); }
+.impact-award-mobile-grid img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .impact-circular-gallery > div:active { cursor: grabbing; }
 .impact-circular-gallery > div:focus,
 .impact-circular-gallery > div:focus-visible { outline: none !important; }
@@ -63,6 +66,7 @@
   .impact-award-shell { min-height: 0; }
   .impact-award-shell .impact-evidence-note { margin-right: 14px; margin-left: 14px; }
   .impact-circular-gallery { height: 330px; }
+  .impact-award-mobile-grid { grid-auto-columns: minmax(122px, 30vw); }
   .impact-logo-shell { min-height: 0; padding: 8px 16px 10px; }
   .impact-reach-dossier { padding: 16px; }
 }
