@@ -259,11 +259,22 @@ export default function VideoPostProcess() {
       onResize();
     };
     let frame = 0;
+    let lastRenderAt = 0;
+    const renderInterval = window.innerWidth <= 760 ? 1000 / 30 : 1000 / 60;
     const render = (time) => {
+      if (document.hidden) {
+        frame = 0;
+        return;
+      }
       frame = requestAnimationFrame(render);
+      if (time - lastRenderAt < renderInterval) return;
+      lastRenderAt = time;
       if (video.readyState >= 2) texture.needsUpdate = true;
       program.uniforms.uTime.value = time * 0.001;
       renderer.render({ scene: mesh });
+    };
+    const onVisibilityChange = () => {
+      if (!document.hidden && !frame) frame = requestAnimationFrame(render);
     };
 
     applySettings(settings);
@@ -272,6 +283,7 @@ export default function VideoPostProcess() {
     window.addEventListener('video-tuning-change', onTuningChange);
     video.addEventListener('loadedmetadata', onVideoMetadata);
     window.addEventListener('resize', onResize, { passive: true });
+    document.addEventListener('visibilitychange', onVisibilityChange);
     frame = requestAnimationFrame(render);
 
     return () => {
@@ -279,6 +291,7 @@ export default function VideoPostProcess() {
       window.removeEventListener('video-tuning-change', onTuningChange);
       video.removeEventListener('loadedmetadata', onVideoMetadata);
       window.removeEventListener('resize', onResize);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       container.classList.remove('is-webgl-ready');
       canvas.remove();
       renderer.gl.getExtension('WEBGL_lose_context')?.loseContext();

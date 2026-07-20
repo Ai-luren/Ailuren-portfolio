@@ -1,6 +1,7 @@
 import './ImpactEvidence.css';
 import CircularGallery from './CircularGallery.jsx';
 import LogoLoop from './LogoLoop.jsx';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import hailuoLogo from '../../创作者LOGO/hailuo-color.webp';
 import jimengLogo from '../../创作者LOGO/jimeng-color.webp';
@@ -73,6 +74,28 @@ const reachCards = [
   },
 ];
 
+function useNearViewport(rootMargin = '500px') {
+  const ref = useRef(null);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return undefined;
+    if (!('IntersectionObserver' in window)) {
+      setReady(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting) {
+        setReady(true);
+        observer.disconnect();
+      }
+    }, { rootMargin });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [rootMargin]);
+  return [ref, ready];
+}
+
 function ImpactLabel({ index, title, description }) {
   return (
     <div className="impact-evidence-label">
@@ -84,16 +107,24 @@ function ImpactLabel({ index, title, description }) {
 }
 
 function CircularAwardGallery() {
-  const galleryItems = awards.map(({ image, title, meta }) => ({
+  const [galleryRef, ready] = useNearViewport('700px');
+  const [loadedCount, setLoadedCount] = useState(0);
+  const galleryItems = useMemo(() => awards.map(({ image, title, meta }) => ({
     image,
     text: `${title} / ${meta}`
-  }));
+  })), []);
 
   return (
     <div className="impact-glass impact-award-shell">
       <div className="impact-evidence-note"><span>AWARD CERTIFICATES / 获奖截图</span><span>DRAG TO EXPLORE / 拖拽查看</span></div>
-      <div className="impact-circular-gallery">
-        <CircularGallery
+      <div ref={galleryRef} className="impact-circular-gallery">
+        {loadedCount < awards.length && (
+          <div className="impact-award-loader" role="status" aria-live="polite">
+            <span>ARCHIVE LOADING</span>
+            <strong>{ready ? `${loadedCount} / ${awards.length}` : '准备档案'}</strong>
+          </div>
+        )}
+        {ready && <CircularGallery
           items={galleryItems}
           bend={5}
           textColor="#d7e3eb"
@@ -105,24 +136,26 @@ function CircularAwardGallery() {
           enableWheel={false}
           enableKeyboard={false}
           verticalOffset={-0.25}
-        />
+          onImageLoad={setLoadedCount}
+        />}
       </div>
     </div>
   );
 }
 
 function LogoIndex() {
+  const [logoRef, ready] = useNearViewport('500px');
   return (
-    <div className="impact-glass impact-logo-shell">
+    <div ref={logoRef} className="impact-glass impact-logo-shell">
       <div className="impact-logo-head"><span>CREATOR PLATFORMS / 创作平台</span><span>SUPER CREATORS / 超级创作者</span></div>
-      <LogoLoop
+      {ready && <LogoLoop
         logos={creatorLogos}
         speed={28}
         logoHeight={48}
         gap={48}
         hoverSpeed={0}
         ariaLabel="创作者平台 Logo"
-      />
+      />}
     </div>
   );
 }

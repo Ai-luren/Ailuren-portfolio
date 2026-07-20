@@ -22,3 +22,8 @@ pnpm-debug.log*
 .audit/
 .impeccable/
 .uploads/
+
+# Tencent Cloud EdgeOne
+.env
+.edgeone/*
+.tef_dist/*

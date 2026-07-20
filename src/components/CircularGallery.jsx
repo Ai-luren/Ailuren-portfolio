@@ -222,7 +222,8 @@ class Media {
     borderRadius = 0,
     font,
     showTitles = true,
-    verticalOffset = 0
+    verticalOffset = 0,
+    onImageLoad
   }) {
     this.extra = 0;
     this.geometry = geometry;
@@ -241,6 +242,7 @@ class Media {
     this.font = font;
     this.showTitles = showTitles;
     this.verticalOffset = verticalOffset;
+    this.onImageLoad = onImageLoad;
     // The current award archive uses portrait posters. Keep the card plane
     // aligned with the source image so the shader never has to crop them.
     this.imageAspect = 1124 / 2000;
@@ -323,7 +325,9 @@ class Media {
       this.program.uniforms.uImageSizes.value = [img.naturalWidth, img.naturalHeight];
       this.imageAspect = img.naturalWidth / img.naturalHeight;
       this.onResize();
+      this.onImageLoad?.();
     };
+    img.onerror = () => this.onImageLoad?.();
   }
   createMesh() {
     this.plane = new Mesh(this.gl, {
@@ -419,7 +423,8 @@ class App {
       showTitles = true,
       enableWheel = true,
       enableKeyboard = true,
-      verticalOffset = 0
+      verticalOffset = 0,
+      onImageLoad
     } = {}
   ) {
     document.documentElement.classList.remove('no-js');
@@ -427,6 +432,9 @@ class App {
     this.scrollSpeed = scrollSpeed;
     this.enableWheel = enableWheel;
     this.enableKeyboard = enableKeyboard;
+    this.isVisible = !document.hidden;
+    this.loadedImages = new Set();
+    this.onImageLoad = onImageLoad;
     this.scroll = { ease: scrollEase, current: 0, target: 0, last: 0 };
     this.onCheckDebounce = debounce(this.onCheck, 200);
     this.createRenderer();
@@ -435,7 +443,7 @@ class App {
     this.onResize();
     this.createGeometry();
     this.createMedias(items, bend, textColor, borderRadius, font, showTitles, verticalOffset);
-    this.update();
+    if (this.isVisible) this.update();
     this.addEventListeners();
   }
   createRenderer() {
@@ -496,7 +504,12 @@ class App {
           borderRadius,
           font,
           showTitles,
-          verticalOffset
+          verticalOffset,
+          onImageLoad: () => {
+            if (this.loadedImages.has(data.image)) return;
+            this.loadedImages.add(data.image);
+            this.onImageLoad?.(this.loadedImages.size);
+          }
       });
     });
   }
@@ -569,6 +582,10 @@ class App {
     }
   }
   update() {
+    if (!this.isVisible || document.hidden) {
+      this.raf = 0;
+      return;
+    }
     this.scroll.current = lerp(this.scroll.current, this.scroll.target, this.scroll.ease);
     const direction = this.scroll.current > this.scroll.last ? 'right' : 'left';
     if (this.medias) {
@@ -578,6 +595,10 @@ class App {
     this.scroll.last = this.scroll.current;
     this.raf = window.requestAnimationFrame(this.update.bind(this));
   }
+  setVisibility(isVisible) {
+    this.isVisible = isVisible;
+    if (this.isVisible && !document.hidden && !this.raf) this.update();
+  }
   addEventListeners() {
     this.boundOnResize = this.onResize.bind(this);
     this.boundOnWheel = this.onWheel.bind(this);
@@ -586,6 +607,7 @@ class App {
     this.boundOnTouchUp = this.onTouchUp.bind(this);
     this.boundOnPointerLeave = this.onPointerLeave.bind(this);
     this.boundOnWindowBlur = this.onWindowBlur.bind(this);
+    this.boundOnVisibility = () => this.setVisibility(!document.hidden);
     this.boundOnKeyDown = this.onKeyDown.bind(this);
     window.addEventListener('resize', this.boundOnResize);
     if (this.enableWheel) {
@@ -597,6 +619,7 @@ class App {
     window.addEventListener('mousemove', this.boundOnTouchMove);
     window.addEventListener('mouseup', this.boundOnTouchUp);
     window.addEventListener('blur', this.boundOnWindowBlur);
+    document.addEventListener('visibilitychange', this.boundOnVisibility);
     this.container.addEventListener('touchstart', this.boundOnTouchDown);
     window.addEventListener('touchmove', this.boundOnTouchMove);
     window.addEventListener('touchend', this.boundOnTouchUp);
@@ -615,6 +638,7 @@ class App {
     window.removeEventListener('mousemove', this.boundOnTouchMove);
     window.removeEventListener('mouseup', this.boundOnTouchUp);
     window.removeEventListener('blur', this.boundOnWindowBlur);
+    document.removeEventListener('visibilitychange', this.boundOnVisibility);
     this.container.removeEventListener('touchstart', this.boundOnTouchDown);
     window.removeEventListener('touchmove', this.boundOnTouchMove);
     window.removeEventListener('touchend', this.boundOnTouchUp);
@@ -638,13 +662,22 @@ export default function CircularGallery({
   showTitles = true,
   enableWheel = true,
   enableKeyboard = true,
-  verticalOffset = 0
+  verticalOffset = 0,
+  onImageLoad
 }) {
   const containerRef = useRef(null);
   useEffect(() => {
     if (!containerRef.current) return;
     let app;
     let isMounted = true;
+    let latestVisibility = true;
+    const visibilityObserver = 'IntersectionObserver' in window
+      ? new IntersectionObserver(([entry]) => {
+        latestVisibility = Boolean(entry?.isIntersecting);
+        app?.setVisibility(latestVisibility);
+      }, { rootMargin: '160px' })
+      : null;
+    visibilityObserver?.observe(containerRef.current);
     resolveFont(font, fontUrl).then(resolvedFont => {
       if (!isMounted || !containerRef.current) return;
       app = new App(containerRef.current, {
@@ -658,14 +691,17 @@ export default function CircularGallery({
         showTitles,
         enableWheel,
         enableKeyboard,
-        verticalOffset
+        verticalOffset,
+        onImageLoad
       });
+      app.setVisibility(latestVisibility);
     });
     return () => {
       isMounted = false;
+      visibilityObserver?.disconnect();
       if (app) app.destroy();
     };
-  }, [items, bend, textColor, borderRadius, font, fontUrl, scrollSpeed, scrollEase, showTitles, enableWheel, enableKeyboard, verticalOffset]);
+  }, [items, bend, textColor, borderRadius, font, fontUrl, scrollSpeed, scrollEase, showTitles, enableWheel, enableKeyboard, verticalOffset, onImageLoad]);
   return (
     <div
       className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
