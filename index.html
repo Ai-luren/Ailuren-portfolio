@@ -1370,8 +1370,19 @@
     }
     body.is-on-recognition #video-overlay { opacity: 1; }
 
-    /* 最终覆盖旧的章节级视频蒙版规则：Hero 使用 #top::before，其他章节保持原始视频亮度。 */
-    #video-overlay { display: none !important; }
+    /* WebGL 画布只负责视频后处理；叙事蒙版始终位于画布之上。 */
+    #video-webgl { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; }
+    #hero-profile-mask { z-index: 2; }
+    #video-overlay,
+    #video-bg.is-webgl-ready #video-overlay {
+      display: block !important;
+      z-index: 3;
+    }
+    #video-vignette,
+    #video-bg.is-webgl-ready #video-vignette {
+      display: block !important;
+      z-index: 4;
+    }
 
     /* 不再让每个模块都像一块玻璃，卡片只承担阅读边界。 */
     header,
