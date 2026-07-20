@@ -9,7 +9,8 @@ export default function CometCard({ children, className = '', ...props }) {
     if (!card) return undefined;
     if (window.matchMedia('(pointer: coarse)').matches) return undefined;
     let disposed = false;
-    let revertContext = () => {};
+    let nativeCleanup = null;
+    let gsapCleanup = () => {};
 
     const setupNativeInteraction = () => {
       const setCardState = (rotateX, rotateY, lift) => {
@@ -21,16 +22,21 @@ export default function CometCard({ children, className = '', ...props }) {
       const handlePointerMove = event => {
         if (event.pointerType === 'touch') return;
         const rect = card.getBoundingClientRect();
+        if (!rect.width || !rect.height || !Number.isFinite(event.clientX) || !Number.isFinite(event.clientY)) return;
         const x = (event.clientX - rect.left) / rect.width;
         const y = (event.clientY - rect.top) / rect.height;
         setCardState(`${(0.5 - y) * 12}deg`, `${(x - 0.5) * 12}deg`, '-4px');
       };
 
       card.addEventListener('pointermove', handlePointerMove);
+      card.addEventListener('mousemove', handlePointerMove);
       card.addEventListener('pointerleave', reset);
+      card.addEventListener('mouseleave', reset);
       return () => {
         card.removeEventListener('pointermove', handlePointerMove);
+        card.removeEventListener('mousemove', handlePointerMove);
         card.removeEventListener('pointerleave', reset);
+        card.removeEventListener('mouseleave', reset);
         reset();
       };
     };
@@ -38,10 +44,9 @@ export default function CometCard({ children, className = '', ...props }) {
     const setupInteraction = () => {
       if (disposed) return;
       const gsap = getGsap();
-      if (!gsap) {
-        revertContext = setupNativeInteraction();
-        return;
-      }
+      if (!gsap) return;
+      nativeCleanup?.();
+      nativeCleanup = null;
       const context = gsap.context(() => {
         const rotateXTo = gsap.quickTo(card, '--comet-rotate-x', { duration: .22, ease: 'power2.out' });
         const rotateYTo = gsap.quickTo(card, '--comet-rotate-y', { duration: .22, ease: 'power2.out' });
@@ -54,6 +59,7 @@ export default function CometCard({ children, className = '', ...props }) {
         const handlePointerMove = event => {
           if (event.pointerType === 'touch') return;
           const rect = card.getBoundingClientRect();
+          if (!rect.width || !rect.height || !Number.isFinite(event.clientX) || !Number.isFinite(event.clientY)) return;
           const x = (event.clientX - rect.left) / rect.width;
           const y = (event.clientY - rect.top) / rect.height;
           rotateYTo(`${(x - 0.5) * 12}deg`);
@@ -68,21 +74,27 @@ export default function CometCard({ children, className = '', ...props }) {
         };
 
         card.addEventListener('pointermove', handlePointerMove);
+        card.addEventListener('mousemove', handlePointerMove);
         card.addEventListener('pointerleave', reset);
+        card.addEventListener('mouseleave', reset);
         card.addEventListener('pointerdown', handlePointerDown);
         card.addEventListener('pointerup', handlePointerUp);
         card.addEventListener('pointercancel', handlePointerUp);
 
         return () => {
           card.removeEventListener('pointermove', handlePointerMove);
+          card.removeEventListener('mousemove', handlePointerMove);
           card.removeEventListener('pointerleave', reset);
+          card.removeEventListener('mouseleave', reset);
           card.removeEventListener('pointerdown', handlePointerDown);
           card.removeEventListener('pointerup', handlePointerUp);
           card.removeEventListener('pointercancel', handlePointerUp);
         };
       }, card);
-      revertContext = () => context.revert();
+      gsapCleanup = () => context.revert();
     };
+
+    nativeCleanup = setupNativeInteraction();
 
     const gsapReady = window.__gsapReady;
     if (gsapReady && typeof gsapReady.then === 'function') {
@@ -93,7 +105,8 @@ export default function CometCard({ children, className = '', ...props }) {
 
     return () => {
       disposed = true;
-      revertContext();
+      nativeCleanup?.();
+      gsapCleanup();
     };
   }, []);
 
