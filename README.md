@@ -32,7 +32,7 @@ git diff --check
 - `src/components/MagneticProjectArchive.jsx`：精选创作档案卡片。
 - `src/components/ImpactEvidence.jsx`：获奖作品、创作平台和内容发布模块。
 - `assets/`：字体、图标和页面图片。
-- `public/vendor/`：GSAP 与 ScrollTrigger 静态脚本。
+- `vendor/`：GSAP 与 ScrollTrigger 静态脚本。
 - `hero.mp4`：全站深空背景视频。
 - `docs/`：当前规范和交接说明。
 
