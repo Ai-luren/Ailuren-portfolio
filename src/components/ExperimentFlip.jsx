@@ -154,6 +154,13 @@ export default function ExperimentFlip() {
     const gsap = getGsap();
     if (!gsap) return;
     pendingFlipState.current = null;
+    // 在 Flip 动画开始前，立即隐藏新 feature 卡的 workflow 子元素，
+    // 避免它们先以可见态渲染再被 gsap.from 突然隐藏导致的闪烁。
+    const featureCard = rootRef.current?.querySelector('.flip-experiment__card.is-feature');
+    const workflowEls = featureCard?.querySelectorAll('.flip-experiment__workflow > *');
+    if (workflowEls?.length) {
+      gsap.set(workflowEls, { autoAlpha: 0 });
+    }
     Flip.from(state, {
       duration: 0.48,
       ease: 'power3.inOut',
@@ -163,19 +170,18 @@ export default function ExperimentFlip() {
       clearProps: 'transform',
       onComplete: () => {
         // 切换完成后，feature 卡的 workflow 子元素分层落位
-        const featureCard = rootRef.current?.querySelector('.flip-experiment__card.is-feature');
-        if (!featureCard) return;
-        const workflowEls = featureCard.querySelectorAll('.flip-experiment__workflow > *');
-        if (workflowEls.length) {
-          gsap.from(workflowEls, {
-            autoAlpha: 0,
-            y: 10,
-            stagger: 0.06,
-            duration: 0.4,
+        if (!workflowEls?.length) return;
+        gsap.fromTo(workflowEls,
+          { autoAlpha: 0, y: 8 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            stagger: 0.04,
+            duration: 0.3,
             ease: 'power2.out',
-            delay: 0.18,
-          });
-        }
+            delay: 0.05,
+          }
+        );
       },
     });
   }, [activeId]);
